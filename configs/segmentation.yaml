@@ -1,0 +1,74 @@
+# Segmentation configuration: leaf vs. background binary semantic segmentation.
+# All segmentation-related scripts/notebooks must read parameters from this
+# file. Do not hard-code these values in source code.
+
+experiment:
+  name: "basil_segmentation_unet_resnet34"
+  seed: 42
+  output_dir: "experiments/segmentation"
+
+dataset:
+  images_dir: "data/basil/segmentation/images"
+  masks_dir: "data/basil/segmentation/masks"
+  metadata_csv: "data/basil/segmentation/metadata.csv"
+  image_size: [512, 512]        # [height, width], fed to the model
+  num_workers: 4
+
+split:
+  # Column in metadata_csv used to group images so that no group appears in
+  # more than one of train/val/test. Prevents data leakage between images
+  # of the same plant or capture session.
+  group_column: "plant_id"
+  test_size: 0.2                # fraction of groups held out as test
+  val_size: 0.15                # fraction of all groups held out as val
+  split_file: "data/basil/segmentation/split.csv"
+
+model:
+  architecture: "unet"          # unet | tiny_unet
+  encoder_name: "resnet34"      # resnet18 | resnet34 | tiny
+  encoder_weights: "imagenet"
+  in_channels: 3
+  num_classes: 1                # binary segmentation -> single logit channel + sigmoid
+
+loss:
+  type: "dice_bce"              # dice_bce | dice | bce | focal
+  dice_weight: 0.5
+  bce_weight: 0.5
+  focal_gamma: 2.0              # only used when type == "focal"
+  focal_alpha: 0.25             # only used when type == "focal"
+
+training:
+  batch_size: 8
+  epochs: 60
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+  optimizer: "adamw"
+  lr_scheduler: "cosine"
+  early_stopping_patience: 10
+  early_stopping_metric: "val_dice"
+  mixed_precision: true
+  checkpoint_dir: "experiments/segmentation/checkpoints"
+  save_best_only: false          # also keep the final checkpoint, per project requirements
+
+augmentation:
+  enabled: true
+  horizontal_flip_prob: 0.5
+  vertical_flip_prob: 0.0        # disabled by default; enable only if physically reasonable
+  rotation_limit_degrees: 15
+  translate_percent: 0.05
+  scale_limit: 0.1
+  brightness_limit: 0.15
+  contrast_limit: 0.15
+  saturation_limit: 0.15
+  hue_shift_limit: 8
+  gaussian_noise_prob: 0.2
+  blur_prob: 0.1
+
+metrics:
+  threshold: 0.5                 # probability threshold used to binarize predictions
+  report_metrics: ["dice", "iou", "precision", "recall", "f1", "pixel_accuracy"]
+
+background_removal:
+  default_mode: "black"          # black | gray | blur
+  gray_value: 128
+  blur_kernel_size: 31

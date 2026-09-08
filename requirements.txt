@@ -1,0 +1,2 @@
+# Runtime plus PyTorch dependencies. Version bounds live in pyproject.toml.
+-e .[ml]

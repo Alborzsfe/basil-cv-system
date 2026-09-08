@@ -1,0 +1,81 @@
+# Disease classification configuration.
+#
+# IMPORTANT: add only verified ground-truth disease labels. The inference-only
+# value "unknown" must never be included in this training class list.
+
+experiment:
+  name: "basil_classification_effnetv2s"
+  seed: 42
+  output_dir: "experiments/classification"
+
+dataset:
+  root_dir: "."
+  metadata_csv: "data/basil/classification/metadata.csv"
+  image_size: [384, 384]
+  num_workers: 4
+  # input_mode controls what the classifier actually sees:
+  #   raw_image            -> original RGB image (Experiment A)
+  #   leaf_only             -> background-removed leaf image (Experiment B, default)
+  #   leaf_only_mask_aware  -> leaf-only image plus mask-derived auxiliary channel(s)
+  input_mode: "leaf_only"
+  background_mode: "black"       # black | gray | blur
+
+classes: []                       # populate with at least two verified labels
+
+split:
+  group_column: "plant_id"
+  test_size: 0.2
+  val_size: 0.15                  # fraction of all groups held out as val
+  split_file: "data/basil/classification/split.csv"
+
+model:
+  architecture: "efficientnet_v2_s"   # efficientnet_v2_s | resnet50 | convnext_tiny | tiny_cnn
+  pretrained: true
+  freeze_backbone_initially: true
+  unfreeze_after_epoch: 5             # epoch at which deeper layers start unfreezing
+  fine_tune_learning_rate: 0.00001
+
+loss:
+  type: "cross_entropy"       # cross_entropy | focal | weighted_cross_entropy
+  focal_gamma: 2.0
+  class_weights: null         # if null and type == weighted_cross_entropy, weights are
+                               # computed automatically from the training class distribution
+
+sampling:
+  strategy: "none"            # none | weighted_sampler
+  # Only one imbalance-handling strategy should be active at a time; do not
+  # combine weighted loss AND weighted sampling by default.
+
+training:
+  batch_size: 16
+  epochs: 40
+  head_learning_rate: 0.001
+  weight_decay: 0.0001
+  optimizer: "adamw"
+  lr_scheduler: "cosine"
+  early_stopping_patience: 8
+  early_stopping_metric: "val_macro_f1"
+  mixed_precision: true
+  checkpoint_dir: "experiments/classification/checkpoints"
+
+augmentation:
+  enabled: true
+  horizontal_flip_prob: 0.5
+  vertical_flip_prob: 0.0
+  rotation_limit_degrees: 15
+  brightness_limit: 0.15
+  contrast_limit: 0.15
+  saturation_limit: 0.15
+  hue_shift_limit: 8
+  gaussian_noise_prob: 0.15
+
+evaluation:
+  metrics: ["accuracy", "precision", "recall", "f1_macro", "f1_weighted",
+            "specificity", "sensitivity", "roc_auc", "pr_auc", "confusion_matrix"]
+
+uncertainty:
+  confidence_threshold: 0.6   # below this max-softmax-probability, prediction becomes "unknown"
+
+explainability:
+  grad_cam_enabled: true
+  target_layer: "auto"        # "auto" selects the last convolutional block of the backbone

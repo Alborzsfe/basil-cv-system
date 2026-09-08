@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+
+# Packaging and editor files
+build/
+dist/
+*.egg-info/
+.DS_Store
+.idea/
+.vscode/
+
+# Local data: retain only the directory scaffolding
+/data/basil/raw/*
+!/data/basil/raw/.gitkeep
+/data/basil/segmentation/images/*
+!/data/basil/segmentation/images/.gitkeep
+/data/basil/segmentation/masks/*
+!/data/basil/segmentation/masks/.gitkeep
+/data/basil/classification/*
+!/data/basil/classification/.gitkeep
+
+# Run outputs and checkpoints
+/outputs/*
+!/outputs/.gitkeep
+/experiments/**
+!/experiments/**/
+!/experiments/**/.gitkeep
+
+# Deterministic synthetic evidence under docs/results is committed.

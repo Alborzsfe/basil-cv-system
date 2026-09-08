@@ -1,0 +1,29 @@
+{
+  "scope": "synthetic functional smoke test only",
+  "scientific_claim": false,
+  "result": {
+    "status": "ok",
+    "prediction": "synthetic_healthy_like",
+    "confidence": 0.8021839261054993,
+    "probabilities": {
+      "synthetic_healthy_like": 0.8021839261054993,
+      "synthetic_spotted_like": 0.1978161334991455
+    },
+    "leaf_coverage": 0.4107818603515625,
+    "quality": {
+      "passed": true,
+      "mean_brightness": 125.39329528808594,
+      "laplacian_variance": 342.8629147699103,
+      "reasons": []
+    },
+    "artifact_paths": {
+      "original": "docs/results/smoke/22725259ea85/original.png",
+      "probability_mask": "docs/results/smoke/22725259ea85/probability_mask.png",
+      "binary_mask": "docs/results/smoke/22725259ea85/binary_mask.png",
+      "leaf_only": "docs/results/smoke/22725259ea85/leaf_only.png",
+      "result": "docs/results/smoke/22725259ea85/result.json",
+      "montage": "docs/results/smoke/pipeline_montage.png"
+    },
+    "reason": null
+  }
+}

@@ -1,0 +1,49 @@
+# End-to-end inference configuration: raw image -> quality check ->
+# segmentation -> background removal -> classification -> final prediction.
+#
+# This file is only meaningful once trained segmentation and classification
+# checkpoints exist (see experiments/segmentation and
+# experiments/classification). Update the checkpoint paths below after
+# training.
+
+segmentation_checkpoint: "experiments/segmentation/checkpoints/best_model.pt"
+classification_checkpoint: "experiments/classification/checkpoints/best_model.pt"
+
+segmentation_config: "configs/segmentation.yaml"
+classification_config: "configs/classification.yaml"
+
+device: "auto"          # auto | cpu | cuda
+
+image_quality:
+  min_mean_brightness: 20      # 0-255 scale; below this, image is "too dark"
+  max_mean_brightness: 235     # 0-255 scale; above this, image is "too bright"
+  min_laplacian_variance: 30.0 # below this, image is considered excessively blurred
+
+background_removal:
+  mode: "black"          # black | gray | blur
+  gray_value: 128
+  blur_kernel_size: 31
+
+mask_cleanup:
+  kernel_size: 5
+  minimum_component_area: 64
+
+leaf_coverage:
+  minimum_required_coverage: 0.02
+  # If the visible leaf coverage is below this fraction of the image, the
+  # pipeline returns "Insufficient Visible Leaf Area" instead of forcing a
+  # disease prediction.
+
+classification:
+  confidence_threshold: 0.6
+  # If the maximum class probability is below this threshold, the final
+  # prediction becomes "unknown" regardless of the raw argmax class.
+
+explainability:
+  generate_grad_cam: true
+
+output:
+  save_intermediate_artifacts: true
+  # When true, saves: original image, raw mask, binary mask, leaf-only
+  # image, and (if enabled) the Grad-CAM overlay, for every inference call.
+  artifacts_dir: "outputs/inference"
